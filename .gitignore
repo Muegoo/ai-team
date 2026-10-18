@@ -1,0 +1,15 @@
+# Credentials and local settings
+.env
+.env.*
+!.env.example
+auth.json
+credentials.json
+
+# Machine-local files and runtime output
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.headroom-cache/
+.venv/
+node_modules/
