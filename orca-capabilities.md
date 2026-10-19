@@ -1,8 +1,20 @@
-# บันทึกความสามารถ Orca ที่ตรวจในเครื่อง
+# บันทึกความสามารถ Orca
+
+## สถานะ macOS ปัจจุบัน
+
+ตรวจพบ Orca 1.4.221 บน macOS และ `orca status --json` รายงานว่า runtime ready/reachable เมื่อรันนอก sandbox; คำสั่งใน sandbox ถูกปฏิเสธด้วย `runtime_access_denied` การตรวจสถานะเบื้องต้นนี้เพียงอย่างเดียวไม่ได้ dispatch worker หรือทดสอบ lifecycle และไม่ได้ยืนยัน authentication ของบัญชี, model entitlement หรือ account routing รายละเอียด launch จริงล่าสุดบันทึกแยกไว้ด้านล่าง
+
+### หลักฐานการ launch ล่าสุด — 19 ตุลาคม 2026
+
+Launch receipt ระบุว่า Codex Luna ที่ effort `high` เป็น effective launch และ launch สำเร็จ หลังจากนั้นตรวจ links แบบ read-only ได้ แต่ติด usage limit ก่อนส่ง `worker_done`; task จึงล้มเหลว และ worker ถูกหยุดและ release แล้ว การตรวจนี้ไม่ยืนยัน lifecycle success หรือ benchmark result และไม่ได้ยืนยัน account routing นอกเหนือจากข้อมูลใน receipt
+
+## บันทึกจากเครื่อง Windows ในงานวิจัยเดิม
+
+ข้อมูลต่อไปนี้เป็น historical observation จากเครื่อง Windows ไม่ใช่หลักฐานความเข้ากันได้หรือพฤติกรรมบน macOS ปัจจุบัน
 
 ตรวจวันที่ 18 ตุลาคม 2026 ด้วยคำสั่งอ่านคู่มือและ help เท่านั้น ไม่ได้ launch worker, สลับบัญชี หรือแก้ settings
 
-Executable ที่ resolve ได้: `orca` → `C:\Users\UsEr\AppData\Local\Programs\orca\resources\bin\orca.exe`
+พบ executable `orca` บนเครื่อง Windows ที่ใช้ค้นคว้า โดยละ path ของเครื่องไว้เพราะเป็นข้อมูลเฉพาะเครื่อง
 
 ## หลักฐาน
 
