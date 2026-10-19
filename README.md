@@ -16,7 +16,7 @@ Research date: **18 October 2026**. The repository does not install tools, confi
 
 ## Fresh clone setup
 
-1. Clone this repository and open the clone in Orca on branch `ai/docs/setup-benchmark`. Start a fresh agent session in that clone so it discovers this repository's [AGENTS.md](AGENTS.md) and routing skill. Follow [AGENTS.md](AGENTS.md); do not assume a global skill installation or company team wrappers.
+1. Clone this repository and open the clone in Orca on branch `main`. Start a fresh agent session in that clone so it discovers this repository's [AGENTS.md](AGENTS.md) and routing skill. Follow [AGENTS.md](AGENTS.md); do not assume a global skill installation or company team wrappers.
 2. Use an authorized installed Orca runtime, Codex Astra or Sol as controller, and Codex Terra or Luna as executor. Check the installed runtime's guide before lifecycle work. Do not install tools or edit global configuration as part of setup.
 3. For the local scripts, require Python 3.10 or newer. They use only the Python standard library; no pip or npm install is needed. Run `python3 --version`, `python3 scripts/pilot.py preflight`, and `python3 -m unittest discover -s tests -p 'test_*.py'`. Prefix commands with `rtk` when it is already available; RTK itself is optional and is not a bootstrap requirement.
 4. Treat local setup as ready when the Python CLI runs and its tests pass. Preflight reports executable presence only; optional tools being present does not establish authentication, entitlement, or routing. After local setup, run a separate small authorized task and complete the Orca lifecycle smoke test in the [pilot protocol](task-templates.md#lifecycle-smoke-test).
