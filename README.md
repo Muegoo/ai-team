@@ -1,6 +1,6 @@
 # Personal AI Agent Team
 
-Research and a proposed AI team design, now accompanied by active repository routing instructions and a small pilot measurement CLI.
+Research and a proposed AI team design, now accompanied by active repository routing instructions and small planning and evidence CLIs.
 
 Research date: **18 October 2026**. The repository does not install tools, configure accounts, or launch agents. Active routing rules are in [AGENTS.md](AGENTS.md) and [the `ai-team-routing` skill](.agents/skills/ai-team-routing/SKILL.md); older research remains background material.
 
@@ -11,6 +11,8 @@ Research date: **18 October 2026**. The repository does not install tools, confi
 - [Task templates](task-templates.md): briefs, worker assignments, results, and checkpoints.
 - [Pilot protocol](task-templates.md#controlled-pilot): paired-task procedure and `scripts/pilot.py` measurement schema.
 - [Tool preflight and summary CLI](scripts/pilot.py): executable presence check and result aggregation; it does not access accounts or providers.
+- [Workflow CLI](workflow.md): bounded planning, deterministic Orca receipt waiting, and supplied-session usage reading; it does not dispatch workers or acknowledge deliveries.
+- [Local engineering practices](practices.md): skill inventory, traceable contracts, comparative pilot checks, reviewed lessons, and opt-in local checks.
 - [Token tool comparison in Thai](token-tools-comparison.th.md): RTK, Headroom, Serena, Ponytail, and Caveman.
 - [Windows Orca capability notes](orca-capabilities.md): observations from the original research machine, not a compatibility guarantee for macOS.
 

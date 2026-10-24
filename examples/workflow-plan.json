@@ -1,0 +1,32 @@
+{
+  "tasks": [
+    {
+      "task_id": "date-validation",
+      "goal": "Add date validation to the import screen using the existing approved date contract.",
+      "writable_paths": ["src/import/date_validation.py", "tests/import/test_date_validation.py"],
+      "worktree_id": "controller-supplied-worktree-date-validation",
+      "acceptance": ["Invalid dates are rejected according to the existing contract.", "The executor reports evidence and remaining risks."],
+      "constraints": ["Do not change the approved date contract."],
+      "review": "lead"
+    },
+    {
+      "task_id": "settings-empty-state",
+      "goal": "Add an empty state to the settings screen using its existing approved data contract.",
+      "writable_paths": ["src/settings/empty_state.py", "tests/settings/test_empty_state.py"],
+      "worktree_id": "controller-supplied-worktree-settings-empty-state",
+      "acceptance": ["The empty state handles the approved no-data response.", "The executor reports evidence and remaining risks."],
+      "constraints": ["Do not change the approved settings data contract."],
+      "review": "lead"
+    },
+    {
+      "task_id": "integration",
+      "goal": "Integrate both completed leaf changes and verify the complete application.",
+      "writable_paths": ["src/bootstrap.py", "tests/integration/test_workflow.py"],
+      "worktree_id": "controller-supplied-integration-worktree",
+      "depends_on": ["date-validation", "settings-empty-state"],
+      "acceptance": ["Integrated feature passes its acceptance checks.", "The lead reviews the final combined result."],
+      "constraints": ["Do not start until both dependencies are accepted."],
+      "review": "lead"
+    }
+  ]
+}

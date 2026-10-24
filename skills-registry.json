@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "skills": [
+    {
+      "id": "ai-team-routing",
+      "name": "ai-team-routing",
+      "path": ".agents/skills/ai-team-routing/SKILL.md",
+      "source_url": null,
+      "source_revision": null,
+      "role": "controller",
+      "triggers": ["route development work", "select tools and skills", "plan delegation"],
+      "overlap_group": "task-routing",
+      "status": "active",
+      "review": {"verdict": "unreviewed", "reason": "Local repository routing guide; initial inventory entry.", "reviewed_at": null}
+    },
+    {
+      "id": "matt-to-tickets",
+      "name": "to-tickets",
+      "path": null,
+      "source_url": "https://github.com/mattpocock/skills/blob/main/skills/engineering/to-tickets/SKILL.md",
+      "source_revision": null,
+      "role": "controller",
+      "triggers": ["turn an approved plan into tickets", "define independently executable work"],
+      "overlap_group": "planning",
+      "status": "candidate",
+      "review": {"verdict": "unreviewed", "reason": "Candidate inspiration only; availability and revision are unverified.", "reviewed_at": null}
+    },
+    {
+      "id": "matt-domain-modeling",
+      "name": "domain-modeling",
+      "path": null,
+      "source_url": "https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md",
+      "source_revision": null,
+      "role": "controller",
+      "triggers": ["resolve domain language", "clarify business concepts"],
+      "overlap_group": "planning",
+      "status": "candidate",
+      "review": {"verdict": "unreviewed", "reason": "Candidate inspiration only; availability and revision are unverified.", "reviewed_at": null}
+    },
+    {
+      "id": "ecc-skill-stocktake",
+      "name": "skill-stocktake",
+      "path": null,
+      "source_url": "https://github.com/affaan-m/ECC/blob/main/skills/skill-stocktake/SKILL.md",
+      "source_revision": null,
+      "role": "controller",
+      "triggers": ["inventory candidate skills", "review skill overlap"],
+      "overlap_group": "skill-review",
+      "status": "candidate",
+      "review": {"verdict": "unreviewed", "reason": "Candidate inspiration only; availability and revision are unverified.", "reviewed_at": null}
+    },
+    {
+      "id": "ecc-eval-harness",
+      "name": "eval-harness",
+      "path": null,
+      "source_url": "https://github.com/affaan-m/ECC/blob/main/skills/eval-harness/SKILL.md",
+      "source_revision": null,
+      "role": "controller",
+      "triggers": ["design task evaluations", "measure accepted outcomes"],
+      "overlap_group": "evaluation",
+      "status": "candidate",
+      "review": {"verdict": "unreviewed", "reason": "Candidate inspiration only; availability and revision are unverified.", "reviewed_at": null}
+    },
+    {
+      "id": "ecc-continuous-learning-v2",
+      "name": "continuous-learning-v2",
+      "path": null,
+      "source_url": "https://github.com/affaan-m/ECC/blob/main/skills/continuous-learning-v2/SKILL.md",
+      "source_revision": null,
+      "role": "controller",
+      "triggers": ["record a reviewed project lesson", "reuse approved project evidence"],
+      "overlap_group": "learning",
+      "status": "candidate",
+      "review": {"verdict": "unreviewed", "reason": "Candidate inspiration only; availability and revision are unverified.", "reviewed_at": null}
+    }
+  ]
+}

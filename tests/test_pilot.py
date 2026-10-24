@@ -116,6 +116,57 @@ class PilotTests(unittest.TestCase):
             self.assertIn("error: aggregated elapsed_seconds is outside the representable range", result.stderr)
             self.assertNotIn("Traceback", result.stderr)
 
+    def test_comparison_requires_complete_pairs_and_reports_all_missing(self):
+        records = validate_records([
+            row("a", "baseline"), row("a", "team-2"), row("b", "baseline"),
+            row("b", "team-4"), row("c", "team-2"),
+        ])
+        with self.assertRaisesRegex(InputError, "a/team-4, b/team-2, c/baseline, c/team-4"):
+            summarize(records, ["baseline", "team-2", "team-4"])
+
+    def test_complete_comparison_metadata_and_extra_modes(self):
+        records = validate_records([
+            row("a", "baseline", cost=None), row("a", "team-2", tokens=None),
+            row("a", "team-4", elapsed=8), row("b", "baseline"),
+            row("b", "team-2"), row("b", "team-4"),
+        ])
+        result = summarize(records, ["baseline", "team-2"])
+        self.assertEqual(result["comparison"], {"modes": ["baseline", "team-2"], "complete_task_count": 2})
+        self.assertIn("team-4", result["modes"])
+        self.assertEqual(result["modes"]["baseline"]["cost_usd"]["total"], None)
+
+    def test_comparison_requires_multiple_distinct_modes_and_task_ids_are_trimmed(self):
+        with self.assertRaisesRegex(InputError, "at least two"):
+            summarize(validate_records([row(mode="baseline")]), ["baseline"])
+        with self.assertRaisesRegex(InputError, "distinct"):
+            summarize(validate_records([row(mode="baseline")]), ["baseline", "baseline"])
+        with self.assertRaisesRegex(InputError, "trimmed"):
+            validate_records([row(task_id=" task-a ")])
+
+    def test_cli_comparison_and_duplicate_json_keys(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory) / "records.json"
+            fixture.write_text(json.dumps([row("a", "baseline"), row("a", "team-2", cost=0)]), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(SCRIPT), "summarize", str(fixture), "--compare", "baseline", "team-2"], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["comparison"]["complete_task_count"], 1)
+            fixture.write_text('[{"task_id":"a","task_id":"b"}]', encoding="utf-8")
+            invalid = subprocess.run([sys.executable, str(SCRIPT), "summarize", str(fixture)], capture_output=True, text=True)
+            self.assertEqual(invalid.returncode, 2)
+            self.assertEqual(invalid.stdout, "")
+            self.assertNotIn("task_id", invalid.stderr)
+
+    def test_incomplete_comparison_fails_before_cli_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory) / "records.json"
+            fixture.write_text(json.dumps([row("a", "baseline"), row("b", "team-2")]), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(SCRIPT), "summarize", str(fixture), "--compare", "baseline", "team-2"], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("a/team-2", result.stderr)
+            self.assertIn("b/baseline", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

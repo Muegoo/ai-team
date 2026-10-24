@@ -2,6 +2,8 @@
 
 ตัวอย่างต่อไปนี้เป็นรูปแบบเอกสารที่เสนอ ไม่ใช่ schema หรือ config ของ Orca ไม่ใส่ credentials ในไฟล์นี้
 
+สำหรับการตีความตัวอย่าง/การตรวจ defect class ให้ใช้ [นโยบาย Example-based defect coverage ใน ai-team-routing](.agents/skills/ai-team-routing/SKILL.md#example-based-defect-coverage)
+
 ## Brief ที่ Leader เก็บไว้
 
 ```yaml
@@ -11,6 +13,10 @@ acceptance:
   - "สถานะสมาชิกตรงกับ event ที่ตรวจลายเซ็นแล้ว"
   - "event ซ้ำไม่ทำให้สถานะผิด"
   - "integration tests ผ่านบน changes ที่รวมแล้ว"
+reported_examples: []
+suspected_defect_class: "กลไกร่วมที่คาดว่าเป็นต้นเหตุ"
+related_scope: "พื้นผิวที่อนุญาตให้ตรวจเพิ่ม"
+scope_boundary: "ระบุเมื่อผู้ใช้จำกัดขอบเขตอย่างชัดเจน"
 constraints:
   - "ใช้ provider และ stack เดิม"
 decisions_file: "artifacts/subscription/decisions.md"
@@ -24,10 +30,14 @@ account_route: "verified company-approved profile"
 ```text
 Target: backend billing module และจุดเรียกใช้โดยตรง
 Question: lifecycle ของ subscription เก็บและเปลี่ยนสถานะตรงไหน?
+Defect class / related scope: ใช้ขอบเขตจาก Leader; ดูนโยบาย coverage ใน ai-team-routing
+Reported examples: ตัวอย่างจากผู้ใช้ที่ต้องตรวจกรณีเพิ่มเติม
 Inputs: brief และ path ที่เกี่ยวข้อง; ค้น symbol ก่อนอ่าน
 Ownership: อ่าน source; เขียนได้เฉพาะ artifacts/subscription/scout-backend.md
 Exclusions: ห้ามแก้ production code และไม่ scan frontend ซ้ำกับ Scout-B
 Acceptance: ระบุ entry points, invariants, path:line, test ที่มี และส่วนที่ยังไม่ตรวจ
+Additional findings / counterexamples: หลักฐานนอกตัวอย่างและขอบเขตที่พบ (ถ้ามี)
+Coverage: inspected / uninspected พร้อมข้อจำกัด
 Output: สรุปประมาณ 300–700 token; รายละเอียดเก็บใน artifact
 Model preference: Luna; ขอ Leader ยกระดับเมื่อพบตรรกะที่ยังสรุปไม่ได้
 Soft checkpoint: เมื่อเกินเวลาที่ตกลงหรือพบข้อมูลไม่พอ ให้คืนสิ่งที่รู้พร้อม blocker
@@ -38,11 +48,13 @@ Soft checkpoint: เมื่อเกินเวลาที่ตกลงห
 ```text
 Target: src/billing/** ตาม contract ที่ระบุ
 Change: implement webhook handler และ idempotent state update
+Defect class / related scope: ใช้ขอบเขตที่ Leader อนุมัติและผล Scout
 Inputs: brief, contract และ scout artifact เฉพาะส่วนนี้
 Ownership: src/billing/** และ tests/billing/**
 Do not touch: frontend, lockfile, global config, shared schema ที่มีเจ้าของอื่น
 Dependencies: contract ต้องพร้อมก่อนเริ่ม implementation
 Acceptance: test ที่ตรวจ signed event, duplicate event และ invalid event ผ่าน
+Coverage evidence: กลไกร่วมและรูปแบบข้อมูลที่เกี่ยวข้องซึ่งตรวจแล้ว; ระบุ counterexamples หรือส่วนที่ยังไม่ตรวจเมื่อมี
 Output: diff/artifact path, ไฟล์ที่แก้, คำสั่งตรวจและ exit code, ข้อจำกัด
 Escalation: ถ้าต้องเปลี่ยน shared schema ให้ส่งคำขอกลับ Leader ก่อนแก้
 ```
@@ -71,6 +83,7 @@ evidence:
   - "คำสั่งตรวจ + exit code + path log หรือ URL + date"
 coverage: "ขอบเขตที่ตรวจจริง"
 uninspected: "ส่วนที่ยังไม่ตรวจ"
+additional_findings: "กรณีเพิ่มเติมที่มีหลักฐานและ counterexamples/boundaries ถ้ามี"
 risks: []
 next_action: "ผู้รับช่วงหรือการตัดสินใจที่ต้องการ"
 ```
@@ -112,6 +125,8 @@ Exact next action and owner:
 
 ### CLI และ schema
 
+สำหรับ skill inventory, contract-to-ticket briefs, comparative validation และ reviewed lessons ดู [Local engineering practices](practices.md) ส่วนการเลือกงานที่ทำพร้อมกันอย่างจำกัด ใช้ [Workflow CLI](workflow.md) ซึ่งสร้างแผนจาก `worktree_id`, writable paths, dependencies และ acceptance ที่ controller ระบุเอง; ไม่ได้ dispatch worker อัตโนมัติ ใช้ `wait` อ่าน Orca receipts โดยไม่ ACK และใช้ `usage` เฉพาะ log ที่ระบุชัดเจน ดู schema และข้อจำกัดการตีความใน `workflow.md`
+
 ตรวจ executable presence โดยไม่อ่าน config หรือ environment และรวมผลจาก JSON array ด้วยคำสั่งต่อไปนี้:
 
 ```sh
@@ -126,18 +141,10 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 
 ผลสรุปนับสถานะ, accepted/total, first-pass rate (accepted ที่ไม่มี rework หารด้วยงานทั้งหมด), elapsed รวมทุกสถานะ, seconds per accepted (null เมื่อไม่มี accepted), และ rework รวม `cost_usd`/`tokens` ต่อ accepted คำนวณได้เมื่อทุกแถวใน mode นั้นมี metric และมี accepted อย่างน้อยหนึ่งงาน; ผลมี `measured_count` coverage และ `null` เมื่อข้อมูลไม่ครบ ผลจากชุดสังเคราะห์สำหรับทดสอบ CLI ไม่ใช่ benchmark result และห้ามบันทึกเป็นผลการทดลองจริง
 
-### งานทดลองแรก: ตรวจว่าคู่ baseline/team-2 ครบก่อนเปรียบเทียบ
+### Comparative pilot validation
 
-สถานะ: **งานที่รอทำ ยังไม่ได้ implement** ขณะนี้ CLI ตรวจ duplicate และ validation ภายในแต่ละระเบียน แต่ยังไม่ตรวจว่าทุก task มีทั้ง `baseline` และ `team-2`; ห้ามถือผลสรุปปัจจุบันว่าเป็นการตรวจความครบของคู่ทดลอง
+สถานะ: **เครื่องมือตรวจความครบของคู่ implement แล้ว; ยังไม่ได้รัน paired coding pilot จริง** ใช้ `python3 scripts/pilot.py summarize PATH --compare baseline team-2` เพื่อกำหนดอย่างน้อยสอง mode ที่ไม่ซ้ำและบังคับให้ทุก task ID ใน input มี record ในแต่ละ mode ที่เลือก หากข้อมูลไม่ครบ CLI แสดงคู่ task/mode ที่ขาดและไม่เขียน stdout; แถวของ mode อื่นยังอยู่ในผล aggregate ปกติ ส่วน metadata comparison ระบุเฉพาะ mode ที่เลือกและจำนวน task ที่ครบ
 
-**การเปรียบเทียบที่อนุมัติสำหรับงานนี้:** controller กำหนด mode เป็น `baseline` กับ `team-2` ใช้ start commit, inputs, model/effort และ acceptance criteria เดียวกันภายในแต่ละคู่ งาน `baseline` ให้ Luna หนึ่งคน implement พร้อม tests ส่วน `team-2` ให้ Luna คนหนึ่งเขียน tests ก่อนแล้วหยุด จากนั้นส่งต่องานใน worktree เดิมให้ Luna อีกคน implement หลังผู้เขียน tests หยุดแล้ว การส่งต่อทำตามลำดับ จึงห้ามอ้างประโยชน์ด้านความเร็วจากการทำงานขนาน ใช้ worktree ใหม่และ session ใหม่ที่สะอาดแยกกันสำหรับแต่ละ mode และป้องกันไม่ให้คำตอบหรือ diff จากอีก mode รั่วเข้าไป
+ก่อนนำผลไปเปรียบเทียบ controller ต้องคุม start commit, inputs, model/effort และ acceptance criteria ให้เทียบกันได้ภายในแต่ละคู่ บันทึก routing receipt และสถานะ authorization โดยไม่มี secret งาน `baseline` ใช้ controller กับ executor ที่อนุมัติหนึ่งคน; `team-2` ใน pilot ขั้นแรกใช้ Luna เขียน tests แล้วหยุด ก่อนส่งงานใน worktree เดิมให้ Luna อีกคน implement ตามลำดับ จึงห้ามอ้างประโยชน์ด้านความเร็วจากการทำงานขนาน ใช้ worktree และ session ใหม่แยกต่อ mode และป้องกันไม่ให้คำตอบหรือ diff ข้าม mode
 
-**Acceptance criteria:**
-
-- เพิ่ม opt-in comparative validation ใน `scripts/pilot.py` (เสนอ flag `--compare baseline team-2`) ให้ตรวจทุก task ว่ามี record ของทั้งสอง mode ครบก่อนแสดงผลเปรียบเทียบ; `summarize` ปกติยังคงสรุป mode เดียวหรือหลาย mode ที่มีอยู่ได้ตามเดิม
-- เมื่อเปิด comparison แล้วขาดคู่ ให้คืน error ที่ระบุ task และ mode ที่หายไป; คู่ที่ครบสรุปได้ และงานที่ input มี task/mode ขาด record ต้องไม่ผ่าน comparative validation
-- ยังคงปฏิเสธ duplicate task/mode, mode ที่ไม่รองรับ และข้อมูล invalid ตามเดิม
-- เพิ่มกรณีทดสอบคู่ครบ, task/mode ที่ขาด, duplicate และ invalid; tests เดิมทั้ง 9 รายการยังผ่าน
-- บันทึก routing receipt, elapsed time, rework count และ usage โดยเก็บ usage ที่อ่านไม่ได้เป็น unknown/null
-
-เก็บ task metadata และ receipts เป็น sidecar ใน local runtime; อย่า commit ผลตัวเลขหรือข้อมูลทดลองที่ยังไม่มีจริง งานทดลองหนึ่งคู่ยังพิสูจน์การประหยัดไม่ได้ ให้ทำหลาย task จริงและ counterbalance ลำดับ mode ก่อนสรุปผล
+`--compare` ตรวจความครบของ task/mode เท่านั้น ไม่รับรองว่า inputs, models, bases หรือ acceptance เหมือนกัน และไม่พิสูจน์เหตุและผล งานจริงหนึ่งคู่ไม่พอพิสูจน์การประหยัด; ทำ paired task จริงหลายงานและ counterbalance ลำดับ mode ก่อนสรุปผล ตัวอย่างใน `examples/practices/pilot-*.synthetic.json` เป็นข้อมูลสังเคราะห์เท่านั้น ห้ามนับเป็น benchmark หรือ commit ตัวเลขผลทดลองที่ไม่มีจริง Usage ที่อ่านไม่ได้เก็บเป็น `null`/unknown.

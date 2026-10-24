@@ -51,7 +51,23 @@ def _finite_nonnegative(value: Any, field: str, *, integer: bool = False) -> int
 
 
 def _reject_json_constant(value: str) -> None:
-    raise InputError(f"invalid number {value}")
+    raise InputError("invalid nonfinite number")
+
+
+def _json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise InputError("duplicate JSON object key")
+        result[key] = value
+    return result
+
+
+def _json_float(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise InputError("invalid nonfinite number")
+    return number
 
 
 def validate_records(data: Any) -> list[dict[str, Any]]:
@@ -67,8 +83,8 @@ def validate_records(data: Any) -> list[dict[str, Any]]:
         if not isinstance(item, dict):
             raise InputError(f"{label} must be an object")
         task_id = item.get("task_id")
-        if not isinstance(task_id, str) or not task_id.strip():
-            raise InputError(f"{label} task_id must be a nonempty string")
+        if not isinstance(task_id, str) or not task_id.strip() or task_id != task_id.strip():
+            raise InputError(f"{label} task_id must be a nonempty trimmed string")
         mode = item.get("mode")
         if mode not in MODES:
             raise InputError(f"{label} mode must be one of: {', '.join(MODES)}")
@@ -78,7 +94,7 @@ def validate_records(data: Any) -> list[dict[str, Any]]:
 
         key = (task_id, mode)
         if key in seen:
-            raise InputError(f"duplicate task_id/mode: {task_id!r}, {mode!r}")
+            raise InputError("duplicate task_id/mode record")
         seen.add(key)
 
         record: dict[str, Any] = {
@@ -130,7 +146,7 @@ def _safe_divide(numerator: int | float, denominator: int, field: str) -> float:
     return result
 
 
-def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize(records: list[dict[str, Any]], compare: list[str] | None = None) -> dict[str, Any]:
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for record in records:
         groups[record["mode"]].append(record)
@@ -156,6 +172,20 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
             "cost_usd": _metric_summary(rows, "cost_usd", accepted),
             "tokens": _metric_summary(rows, "tokens", accepted),
         }
+    if compare is not None:
+        if len(compare) < 2:
+            raise InputError("comparison requires at least two modes")
+        if len(set(compare)) != len(compare):
+            raise InputError("comparison modes must be distinct")
+        if any(mode not in MODES for mode in compare):
+            raise InputError("comparison contains an unsupported mode")
+        task_ids = sorted({record["task_id"] for record in records})
+        present = {(record["task_id"], record["mode"]) for record in records}
+        missing = [(task_id, mode) for task_id in task_ids for mode in compare if (task_id, mode) not in present]
+        if missing:
+            pairs = ", ".join(f"{task_id}/{mode}" for task_id, mode in missing)
+            raise InputError(f"comparison is missing task/mode pairs: {pairs}")
+        result["comparison"] = {"modes": compare, "complete_task_count": len(task_ids)}
     return result
 
 
@@ -173,6 +203,7 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser("preflight", help="report executable presence only")
     summarize_parser = subparsers.add_parser("summarize", help="aggregate JSON pilot records")
     summarize_parser.add_argument("path", type=Path)
+    summarize_parser.add_argument("--compare", nargs="+", choices=MODES, metavar="MODE")
     args = parser.parse_args(argv)
 
     if args.command == "preflight":
@@ -180,9 +211,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
-        data = json.loads(args.path.read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
+        data = json.loads(args.path.read_text(encoding="utf-8"), object_pairs_hook=_json_object,
+                          parse_constant=_reject_json_constant, parse_float=_json_float)
         records = validate_records(data)
-        _emit(summarize(records))
+        _emit(summarize(records, args.compare))
         return 0
     except (OSError, UnicodeError, json.JSONDecodeError, InputError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)

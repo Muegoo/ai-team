@@ -1,0 +1,5 @@
+[
+  {"task_id": "synthetic-task-a", "mode": "baseline", "status": "accepted", "elapsed_seconds": 120, "rework_count": 0, "cost_usd": null, "tokens": null},
+  {"task_id": "synthetic-task-a", "mode": "team-2", "status": "accepted", "elapsed_seconds": 110, "rework_count": 0, "cost_usd": null, "tokens": null},
+  {"task_id": "synthetic-task-b", "mode": "baseline", "status": "blocked", "elapsed_seconds": 45, "rework_count": 1, "cost_usd": null, "tokens": null}
+]

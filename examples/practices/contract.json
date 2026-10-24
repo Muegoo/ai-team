@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "spec": {
+    "spec_id": "synthetic-date-import",
+    "problem": "The example import screen accepts malformed dates.",
+    "outcome": "Reject invalid dates before creating imported records.",
+    "acceptance": [
+      {"id": "AC-1", "description": "Invalid dates are rejected with a field-level error.", "verification": ["Run the import validation unit test."]},
+      {"id": "AC-2", "description": "Valid dates continue through the import flow.", "verification": ["Run the import integration test."]}
+    ],
+    "out_of_scope": ["Changing the date format contract."],
+    "glossary": "examples/practices/glossary.md",
+    "decisions": ["examples/practices/decision.md"]
+  },
+  "tickets": [
+    {
+      "task_id": "date-validation",
+      "goal": "Reject invalid date input while preserving valid import behavior.",
+      "acceptance_ids": ["AC-1"],
+      "worktree_id": "synthetic-controller-supplied-date-worktree",
+      "writable_paths": ["src/import/date_validation.py", "tests/import/test_date_validation.py"],
+      "depends_on": [],
+      "constraints": ["Keep the existing date contract."],
+      "review": "lead"
+    },
+    {
+      "task_id": "date-import-integration",
+      "goal": "Integrate date validation into the import flow and preserve valid imports.",
+      "acceptance_ids": ["AC-2"],
+      "worktree_id": "synthetic-controller-supplied-integration-worktree",
+      "writable_paths": ["src/import/flow.py", "tests/import/test_flow.py"],
+      "depends_on": ["date-validation"],
+      "constraints": ["Start only after the controller accepts date-validation."],
+      "review": "lead"
+    }
+  ]
+}

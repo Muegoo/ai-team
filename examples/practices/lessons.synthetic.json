@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "lesson_id": "synthetic-date-check",
+      "project_id": "synthetic-example-only",
+      "trigger": "date input validation",
+      "observation": "Synthetic fixture: a clear field-level check makes the example test easier to interpret.",
+      "action": "Synthetic fixture: add one focused invalid-date assertion.",
+      "evidence": ["glossary.md"],
+      "source_task": "synthetic-task-only",
+      "status": "proposed",
+      "reviewed_by": null,
+      "reviewed_at": null
+    }
+  ]
+}
